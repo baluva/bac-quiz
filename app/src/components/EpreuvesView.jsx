@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { sessionLabel, pdfUrl } from '../lib/helpers.js';
-import { getState } from '../lib/store.js';
+import { getState, recordDownload } from '../lib/store.js';
 
 export default function EpreuvesView({ data, qcmIds }) {
   const { sections, years, subjects } = data;
@@ -73,7 +73,7 @@ export default function EpreuvesView({ data, qcmIds }) {
                 </div>
                 <div className="btnrow">
                   <a className="btn ghost" href={pdfUrl(enonce.file)} target="_blank" rel="noreferrer">👁 Voir</a>
-                  <a className="btn primary" href={pdfUrl(enonce.file)} download={enonce.file}>⬇ Télécharger</a>
+                  <a className="btn primary" href={pdfUrl(enonce.file)} download={enonce.file} onClick={() => recordDownload(s.id)}>⬇ Télécharger</a>
                 </div>
                 {extra.length > 0 && (
                   <div className="complement muted">

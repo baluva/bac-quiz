@@ -6,10 +6,12 @@ import { showToast } from './toast.js';
 
 const KEY = 'bacquiz:v1';
 const WELCOME_BONUS = 250; // XP offerts à la 1ʳᵉ connexion avec un compte
+const DOWNLOAD_XP = 5;   // XP gagnés en téléchargeant une épreuve (1 fois par épreuve)
 const DEFAULT = {
   xp: 0, answered: 0, correct: 0, streak: 0, lastDay: null, best: {},
   section: null,        // spécialité choisie (label) → l'app se concentre dessus
   welcomeBonus: false,  // bonus de bienvenue déjà accordé ?
+  downloads: {},        // épreuves déjà téléchargées (anti-farm, local) → { [id]: 1 }
 };
 
 function read() {
@@ -43,12 +45,14 @@ function schedulePush() {
 }
 async function pushNow() {
   if (!userId || !supabase) return;
-  await supabase.from('progress').upsert({
+  const { error } = await supabase.from('progress').upsert({
     user_id: userId, xp: state.xp, answered: state.answered, correct: state.correct,
     streak: state.streak, last_day: state.lastDay, best: state.best,
     section: state.section, welcome_bonus: state.welcomeBonus,
     updated_at: new Date().toISOString(),
   });
+  // Rend visible un échec de synchro (ex : RLS/colonne) au lieu d'échouer en silence.
+  if (error) console.warn('[sync progress] échec :', error.message);
 }
 
 // Fusion locale ↔ cloud : on garde le meilleur des deux (l'utilisateur ne perd
@@ -78,6 +82,7 @@ export async function attachCloud(id) {
     best: mergeBest(state.best, cloud.best || {}),
     section: cloud.section ?? state.section ?? null,
     welcomeBonus: !!cloud.welcome_bonus || state.welcomeBonus,
+    downloads: { ...(state.downloads || {}) }, // dedup local, non synchronisé
   };
   let granted = false;
   if (!cloud.welcome_bonus && !state.welcomeBonus) {
@@ -124,6 +129,15 @@ export function recordQuiz(id, score, total) {
   if (prev === undefined) bonusXp = 50;
   if (prev === undefined || score > prev.score) best[id] = { score, total };
   commit({ ...state, best, xp: state.xp + bonusXp });
+}
+
+// Téléchargement d'une épreuve = +XP (une seule fois par épreuve, anti-farm local).
+export function recordDownload(epreuveId) {
+  if (!epreuveId) return;
+  const got = state.downloads || {};
+  if (got[epreuveId]) return; // déjà comptée → pas de nouvel XP
+  commit({ ...state, downloads: { ...got, [epreuveId]: 1 }, xp: state.xp + DOWNLOAD_XP });
+  showToast(`⬇️ +${DOWNLOAD_XP} XP — merci d'avoir téléchargé une épreuve !`);
 }
 
 // Réinitialise la progression mais garde le statut membre + la spécialité.

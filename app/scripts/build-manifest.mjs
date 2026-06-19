@@ -28,6 +28,7 @@ const MAT = {
   gestion: 'Gestion', economie: 'Économie', technique: 'Technologie',
   sport: 'Éducation physique', anglais: 'Anglais', arabe: 'Arabe', francais: 'Français',
   philo: 'Philosophie', geo: 'Histoire-Géographie', his: 'Histoire-Géographie',
+  hist_geo: 'Histoire-Géographie', his_geo: 'Histoire-Géographie', hist: 'Histoire-Géographie',
   pensee: 'Pensée islamique', allemand: 'Allemand', italien: 'Italien',
   espagnol: 'Espagnol', russe: 'Russe', chinois: 'Chinois', turque: 'Turc',
   portugais: 'Portugais', musique: 'Musique', artistique: 'Arts',
