@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchLeaderboard, REGIONS } from '../lib/leaderboard.js';
 import { useAuth, cloudEnabled } from '../lib/auth.js';
-import { useStore, levelInfo } from '../lib/store.js';
+import { useStore, levelInfo, syncNow } from '../lib/store.js';
 
 const ordinal = (n) => (n === 1 ? '1er' : `${n}e`);
 
@@ -35,6 +35,15 @@ export default function LeaderboardView() {
     return () => clearTimeout(t);
   }, [s.xp]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Filet de sécurité : à l'ouverture, force la synchro de mon XP local vers le
+  // cloud (au cas où un push précédent aurait échoué) puis recharge le classement.
+  useEffect(() => {
+    if (!user) return;
+    Promise.resolve(syncNow()).finally(() => {
+      setTimeout(() => fetchLeaderboard(region === 'all' ? null : region, 100).then(setRows).catch(() => {}), 1300);
+    });
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
@@ -51,8 +60,8 @@ export default function LeaderboardView() {
 
       {cloudEnabled && !user && (
         <div className="card" style={{ marginBottom: 16 }}>
-          <div style={{ fontWeight: 700 }}>Tu n'es pas encore classé</div>
-          <div className="muted" style={{ fontSize: 13 }}>Connecte-toi et renseigne ton prénom, nom et région dans l'onglet Profil pour apparaître ici.</div>
+          <div style={{ fontWeight: 700 }}>Connecte-toi pour apparaître au classement</div>
+          <div className="muted" style={{ fontSize: 13 }}>C'est automatique : dès que tu gagnes de l'XP (QCM réussi ou épreuve téléchargée), tu es classé — sous ton pseudo. Renseigner prénom/nom/région (onglet Profil) est facultatif.</div>
         </div>
       )}
 

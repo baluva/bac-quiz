@@ -95,6 +95,10 @@ export async function attachCloud(id) {
   if (granted) showToast(`🎁 +${WELCOME_BONUS} XP de bienvenue ! Tu es désormais membre, ta progression est synchronisée.`);
 }
 export function detachCloud() { userId = null; clearTimeout(pushTimer); }
+
+// Force une synchro immédiate vers le cloud (filet de sécurité : ouverture du
+// classement, retour sur l'onglet…) pour garantir que l'XP local atteint Supabase.
+export function syncNow() { if (userId && supabase) return pushNow(); }
 function commitNoCloud(next) {
   state = next;
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
