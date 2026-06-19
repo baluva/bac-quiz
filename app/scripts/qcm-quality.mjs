@@ -5,7 +5,8 @@
 // DOCUMENT/texte/annexe SANS `contexte` suffisant pour y répondre.
 
 // Renvoie à un visuel non transcriptible en texte (cas le plus grave).
-export const VISUEL = /\b(figure|sch[ée]ma|graphique|courbe|circuit|montage|diagramme|chronogramme|logigramme|photo|image|dessin|la carte|repr[ée]sent[ée]e? ci|trac[ée]|oscillogramme)\b/i;
+// NB : « figure de style / de rhétorique » n'est PAS un visuel (terme littéraire) → exclu via lookahead.
+export const VISUEL = /\b(figure(?!s?\s+de\s+(?:style|rh[ée]torique))|sch[ée]ma|graphique|courbe|circuit|montage|diagramme|chronogramme|logigramme|photo|image|dessin|la carte|repr[ée]sent[ée]e? ci|trac[ée]|oscillogramme)\b/i;
 
 // Renvoie à un document/texte/extrait/annexe absent (rattrapable via `contexte`).
 export const DOC = /\b(le document|du document|au document|selon le document|le tableau|du tableau|le texte|l'extrait|l['e] annexe|annexe|ci-dessus|ci-dessous|ci-contre|ci-joint|le programme suivant|l'algorithme suivant|le code suivant|la fonction suivante|la requ[êe]te suivante|le sch[ée]ma suivant|de l'exercice|l'exercice n)\b/i;
