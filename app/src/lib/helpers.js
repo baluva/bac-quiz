@@ -22,6 +22,28 @@ export function pdfUrl(file) {
   return `${EPREUVES_BASE}/${encodeURIComponent(file)}`;
 }
 
+// Télécharge un PDF SANS quitter le site. Les fichiers sont sur Cloudflare R2
+// (cross-origin) : l'attribut <a download> y est ignoré et ferait quitter le
+// site. On tente donc un téléchargement « blob » (nécessite le CORS R2) ; en cas
+// d'échec (CORS absent), on ouvre dans un nouvel onglet → le site reste affiché.
+export async function downloadPdf(url, filename) {
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const obj = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = obj;
+    a.download = filename || 'epreuve.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(obj), 5000);
+  } catch {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
+
 // Mélange (Fisher-Yates) — renvoie une copie.
 export function shuffle(arr) {
   const a = [...arr];
