@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isAnswerable } from './qcm-quality.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -118,10 +119,16 @@ fs.writeFileSync(path.join(OUT_DIR, 'epreuves.json'), JSON.stringify(epreuves));
 // ---- QCM ----
 const qcmFiles = fs.existsSync(QCM_DIR) ? fs.readdirSync(QCM_DIR).filter((f) => f.endsWith('.json')) : [];
 const quizzes = [];
+let droppedQ = 0; // questions inrépondables exclues (renvoient à un visuel/doc non visible)
 for (const f of qcmFiles) {
   try {
     const d = JSON.parse(fs.readFileSync(path.join(QCM_DIR, f), 'utf-8'));
     if (!Array.isArray(d.questions) || !d.questions.length) continue;
+    // Filtre qualité : on n'expose QUE les questions répondables sans voir le
+    // sujet (cf. scripts/qcm-quality.mjs). La source JSON reste intacte.
+    const answerable = d.questions.filter(isAnswerable);
+    droppedQ += d.questions.length - answerable.length;
+    if (!answerable.length) continue; // QCM vidé par le filtre → on l'omet
     // Section/matière/année dérivées du NOM DE FICHIER (source canonique,
     // identique aux épreuves) — on ne fait pas confiance aux libellés du JSON
     // (le modèle/l'humain peut écrire « Sciences Techniques » vs « techniques »).
@@ -134,8 +141,8 @@ for (const f of qcmFiles) {
       annee: p ? p.year : d.annee,
       session: p ? p.session : null,
       langue: d.langue || 'fr',
-      nbQuestions: d.questions.length,
-      questions: d.questions,
+      nbQuestions: answerable.length,
+      questions: answerable,
     });
   } catch (e) {
     console.warn('QCM ignoré:', f, e.message);
@@ -146,4 +153,4 @@ const totalQ = quizzes.reduce((n, q) => n + q.nbQuestions, 0);
 fs.writeFileSync(path.join(OUT_DIR, 'qcm.json'), JSON.stringify({ generatedAt: new Date().toISOString(), totalQuestions: totalQ, quizzes }));
 
 console.log(`✅ epreuves.json : ${subjects.length} sujets (${pdfFiles.length} PDF, ${skipped} ignorés), ${usedSections.length} spécialités, années ${years.at(-1)}–${years[0]}`);
-console.log(`✅ qcm.json      : ${quizzes.length} QCM, ${totalQ} questions`);
+console.log(`✅ qcm.json      : ${quizzes.length} QCM, ${totalQ} questions (${droppedQ} inrépondables exclues)`);

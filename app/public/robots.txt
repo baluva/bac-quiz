@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bac-quiz.netlify.app/sitemap.xml
+Sitemap: https://bacquiz-tn.netlify.app/sitemap.xml
