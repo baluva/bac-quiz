@@ -39,6 +39,7 @@ export function setSection(section) { commit({ ...state, section: section || nul
 
 // ---- Cloud sync ----
 let pushTimer = null;
+let syncErrorShown = false; // pour n'afficher l'erreur de synchro qu'une fois
 function schedulePush() {
   clearTimeout(pushTimer);
   pushTimer = setTimeout(pushNow, 1200);
@@ -52,7 +53,12 @@ async function pushNow() {
     updated_at: new Date().toISOString(),
   });
   // Rend visible un échec de synchro (ex : RLS/colonne) au lieu d'échouer en silence.
-  if (error) console.warn('[sync progress] échec :', error.message);
+  if (error) {
+    console.warn('[sync progress] échec :', error.message);
+    if (!syncErrorShown) { syncErrorShown = true; showToast('⚠️ Synchro du classement impossible : ' + error.message); }
+  } else {
+    syncErrorShown = false;
+  }
 }
 
 // Fusion locale ↔ cloud : on garde le meilleur des deux (l'utilisateur ne perd

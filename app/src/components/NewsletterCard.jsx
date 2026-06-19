@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { subscribeNewsletter } from '../lib/newsletter.js';
 import { useAuth } from '../lib/auth.js';
+import { isEmail } from '../lib/validate.js';
 
 export default function NewsletterCard() {
   const { user } = useAuth();
@@ -11,8 +12,10 @@ export default function NewsletterCard() {
 
   async function submit(e) {
     e.preventDefault();
-    setErr(null); setBusy(true);
-    try { await subscribeNewsletter(email, user?.id || null); setDone(true); }
+    setErr(null);
+    if (!isEmail(email)) { setErr('Adresse e-mail invalide.'); return; }
+    setBusy(true);
+    try { await subscribeNewsletter(email.trim(), user?.id || null); setDone(true); }
     catch (e2) { setErr(e2.message || String(e2)); }
     finally { setBusy(false); }
   }

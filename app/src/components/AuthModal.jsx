@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { signUp, signIn, resetPassword } from '../lib/auth.js';
 import { REGIONS } from '../lib/leaderboard.js';
+import { isEmail, nameError, passwordError, MAX_NAME } from '../lib/validate.js';
 
 export default function AuthModal({ onClose }) {
   const [mode, setMode] = useState('signin'); // signin | signup | reset
@@ -17,21 +18,34 @@ export default function AuthModal({ onClose }) {
 
   async function submit(e) {
     e.preventDefault();
-    clear(); setBusy(true);
+    clear();
+    // --- Contrôles de saisie ---
+    const mail = email.trim();
+    if (!isEmail(mail)) { setErr('Adresse e-mail invalide.'); return; }
+    if (mode !== 'reset') {
+      const pe = passwordError(pwd);
+      if (pe) { setErr(pe); return; }
+    }
+    if (mode === 'signup') {
+      const ne = nameError(firstName, 'Prénom') || nameError(lastName, 'Nom');
+      if (ne) { setErr(ne); return; }
+      if (!region) { setErr('Choisis ta région (gouvernorat).'); return; }
+    }
+    setBusy(true);
     try {
       if (mode === 'signup') {
-        const data = await signUp(email, pwd, {
-          pseudo: firstName.trim() || email.split('@')[0],
-          firstName, lastName, region,
+        const data = await signUp(mail, pwd, {
+          pseudo: firstName.trim() || mail.split('@')[0],
+          firstName: firstName.trim(), lastName: lastName.trim(), region,
         });
         if (data?.session) { onClose(); return; } // confirmation désactivée → connecté direct
         setInfo('Compte créé ! Vérifie tes e-mails pour confirmer, puis connecte-toi.');
         setMode('signin');
       } else if (mode === 'reset') {
-        await resetPassword(email);
+        await resetPassword(mail);
         setInfo('Si un compte existe, un e-mail de réinitialisation vient de partir. Vérifie ta boîte (et les spams).');
       } else {
-        await signIn(email, pwd);
+        await signIn(mail, pwd);
         onClose();
       }
     } catch (e2) {
@@ -57,8 +71,8 @@ export default function AuthModal({ onClose }) {
           {mode === 'signup' && (
             <>
               <div style={{ display: 'flex', gap: 8 }}>
-                <input type="text" placeholder="Prénom" value={firstName} onChange={(e) => setFirstName(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
-                <input type="text" placeholder="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
+                <input type="text" placeholder="Prénom" value={firstName} maxLength={MAX_NAME} autoComplete="given-name" onChange={(e) => setFirstName(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
+                <input type="text" placeholder="Nom" value={lastName} maxLength={MAX_NAME} autoComplete="family-name" onChange={(e) => setLastName(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
               </div>
               <select required value={region} onChange={(e) => setRegion(e.target.value)}>
                 <option value="">Ta région (gouvernorat)…</option>

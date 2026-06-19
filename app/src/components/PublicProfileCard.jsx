@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/auth.js';
 import { fetchMyProfile, updatePublicProfile, REGIONS } from '../lib/leaderboard.js';
 import { showToast } from '../lib/toast.js';
+import { nameError, MAX_NAME } from '../lib/validate.js';
 
 export default function PublicProfileCard() {
   const { user } = useAuth();
@@ -32,7 +33,10 @@ export default function PublicProfileCard() {
 
   async function submit(e) {
     e.preventDefault();
-    setErr(null); setBusy(true);
+    setErr(null);
+    const ne = nameError(firstName, 'Prénom') || nameError(lastName, 'Nom');
+    if (ne) { setErr(ne); return; }
+    setBusy(true);
     try {
       await updatePublicProfile(user.id, { firstName, lastName, region });
       showToast('✓ Profil de classement enregistré.');
@@ -49,8 +53,8 @@ export default function PublicProfileCard() {
       <div className="muted" style={{ fontSize: 13 }}>Ces infos sont visibles publiquement dans le classement.</div>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <input type="text" placeholder="Prénom" value={firstName} onChange={(e) => setFirstName(e.target.value)} style={{ flex: 1, minWidth: 140 }} />
-          <input type="text" placeholder="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)} style={{ flex: 1, minWidth: 140 }} />
+          <input type="text" placeholder="Prénom" value={firstName} maxLength={MAX_NAME} onChange={(e) => setFirstName(e.target.value)} style={{ flex: 1, minWidth: 140 }} />
+          <input type="text" placeholder="Nom" value={lastName} maxLength={MAX_NAME} onChange={(e) => setLastName(e.target.value)} style={{ flex: 1, minWidth: 140 }} />
         </div>
         <select value={region} onChange={(e) => setRegion(e.target.value)}>
           <option value="">Ma région (gouvernorat)…</option>
