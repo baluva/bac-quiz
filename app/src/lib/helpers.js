@@ -1,7 +1,20 @@
 export const EPREUVES_BASE = import.meta.env.VITE_EPREUVES_BASE || '/epreuves';
 
-// Prochaine session du bac (épreuve principale, ~mi-juin de l'année suivante).
-export const NEXT_BAC = new Date('2027-06-09T08:00:00');
+// Calendrier du bac (repli quand la table Supabase `bac_schedule` est vide).
+// On cible automatiquement la prochaine date encore à venir → le compte à rebours
+// reste à jour sans redéploiement. Source : calendrier officiel 2026.
+const BAC_DATES = [
+  { label: 'Bac 2026 — épreuves de contrôle', date: '2026-06-29T08:00:00' },
+  { label: 'Résultats du bac 2026 (contrôle)', date: '2026-07-12T08:00:00' },
+  { label: 'Bac 2027 — épreuve principale', date: '2027-06-08T08:00:00' },
+];
+const _nextBac =
+  BAC_DATES.find((d) => new Date(d.date).getTime() > Date.now()) ||
+  BAC_DATES[BAC_DATES.length - 1];
+
+// Prochaine échéance du bac (la plus proche encore à venir) + son libellé.
+export const NEXT_BAC = new Date(_nextBac.date);
+export const NEXT_BAC_LABEL = _nextBac.label;
 
 export const sessionLabel = (s) => (s === 'controle' ? 'Contrôle' : 'Principale');
 

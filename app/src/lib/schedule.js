@@ -2,7 +2,7 @@
 // avec repli sur la date en dur si le cloud est absent / la table vide.
 import { useEffect, useState } from 'react';
 import { supabase } from './supabase.js';
-import { NEXT_BAC } from './helpers.js';
+import { NEXT_BAC, NEXT_BAC_LABEL } from './helpers.js';
 
 export async function fetchNextExam() {
   if (!supabase) return null;
@@ -28,12 +28,18 @@ export async function fetchSchedule(limit = 12) {
 
 // Hook : prochaine épreuve (cible du countdown) + libellé, avec repli.
 export function useNextExam() {
-  const [exam, setExam] = useState({ target: NEXT_BAC, label: 'la prochaine épreuve' });
+  const [exam, setExam] = useState({ target: NEXT_BAC, label: NEXT_BAC_LABEL });
   useEffect(() => {
     let on = true;
     fetchNextExam().then((e) => {
-      if (!on) return;
-      if (e?.starts_at) setExam({ target: new Date(e.starts_at), label: e.label });
+      if (!on || !e?.starts_at) return;
+      // On affiche l'échéance la PLUS PROCHE entre la base (modifiable au dashboard)
+      // et le repli local tenu à jour — évite qu'une vieille date en base (ex. 2027)
+      // masque la prochaine session imminente (ex. contrôle 2026).
+      const dbDate = new Date(e.starts_at);
+      if (dbDate.getTime() < NEXT_BAC.getTime()) {
+        setExam({ target: dbDate, label: e.label });
+      }
     }).catch(() => {});
     return () => { on = false; };
   }, []);
