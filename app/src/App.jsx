@@ -58,7 +58,7 @@ export default function App() {
 
         <div className="footer">
           {epreuves && qcm && (
-            <>Bac Quiz 🇹🇳 — {epreuves.subjects.length} épreuves (2020–2025, 7 spécialités) · {qcm.totalQuestions} questions QCM · ta progression est sauvegardée sur cet appareil.</>
+            <>Bac Quiz 🇹🇳 — {epreuves.subjects.length} épreuves ({epreuves.years.at(-1)}–{epreuves.years[0]}, {epreuves.sections.length} spécialités) · {qcm.totalQuestions} questions QCM · ta progression est sauvegardée sur cet appareil.</>
           )}
         </div>
       </div>
