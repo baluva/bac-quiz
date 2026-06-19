@@ -1,0 +1,5 @@
+# Bac Quiz — robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://bac-quiz.netlify.app/sitemap.xml

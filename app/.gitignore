@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+.env
+.env.local
+*.local
+# public/data/*.json est VERSIONNÉ : le build Netlify n'a pas les 918 Mo de PDF
+# et réutilise ces manifestes générés en local.

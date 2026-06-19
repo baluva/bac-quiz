@@ -1,0 +1,43 @@
+# Déploiement Netlify — app Vite/React dans le sous-dossier app/
+[build]
+  base = "app"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA : toutes les routes renvoient index.html (routage par hash)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# --- En-têtes de sécurité (appliqués à toutes les réponses) ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Empêche l'embarquement du site dans une iframe (clickjacking)
+    X-Frame-Options = "DENY"
+    # Empêche le navigateur de "deviner" le type MIME
+    X-Content-Type-Options = "nosniff"
+    # Ne fuit pas l'URL complète vers les sites tiers (ex : R2)
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Désactive les API non utilisées par le site
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), browsing-topics=()"
+    # Force HTTPS pendant 1 an
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    # Content Security Policy : limite les origines autorisées.
+    # Autorisé : self (JS/CSS/JSON), Google Fonts, Supabase (auth + BDD).
+    # Les PDF (R2) s'ouvrent en navigation plein écran → non concernés par la CSP.
+    # script-src / connect-src autorisent aussi Cloudflare Web Analytics (beacon).
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com; form-action 'self'; upgrade-insecure-requests"
+
+# Cache long pour les assets versionnés (hash dans le nom de fichier)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Les variables VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_EPREUVES_BASE
+# et VITE_SITE_URL se définissent dans Netlify → Site settings → Environment variables.

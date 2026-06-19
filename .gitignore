@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Données brutes & sorties (volumineuses, on ne versionne pas les archives)
+pipeline/data/raw_pdfs/*
+pipeline/data/output/*
+!pipeline/data/raw_pdfs/.gitkeep
+!pipeline/data/output/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node / mobile
+node_modules/
+.expo/
+dist/
+
+
