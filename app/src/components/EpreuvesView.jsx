@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react';
 import { sessionLabel, pdfUrl } from '../lib/helpers.js';
+import { getState } from '../lib/store.js';
 
 export default function EpreuvesView({ data, qcmIds }) {
   const { sections, years, subjects } = data;
-  const [spec, setSpec] = useState('all');
+  // Si une spécialité est choisie (compte/profil), on s'y concentre par défaut.
+  const [spec, setSpec] = useState(() => {
+    const pref = getState().section;
+    return (pref && sections.find((x) => x.label === pref)?.key) || 'all';
+  });
   const [year, setYear] = useState('all');
   const [session, setSession] = useState('all');
   const [q, setQ] = useState('');

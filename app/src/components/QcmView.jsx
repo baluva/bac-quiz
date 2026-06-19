@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useStore } from '../lib/store.js';
+import { useStore, getState } from '../lib/store.js';
 import { shuffle, sessionLabel } from '../lib/helpers.js';
 import QuizPlayer from './QuizPlayer.jsx';
 
@@ -11,7 +11,12 @@ const SECTION_ICON = {
 export default function QcmView({ data }) {
   const s = useStore();
   const quizzes = data.quizzes;
-  const [spec, setSpec] = useState('all');
+  // Si une spécialité est choisie (compte/profil), on s'y concentre par défaut.
+  const [spec, setSpec] = useState(() => {
+    const pref = getState().section;
+    const secs = new Set(quizzes.map((q) => q.section));
+    return pref && secs.has(pref) ? pref : 'all';
+  });
   const [year, setYear] = useState('all');
   const [active, setActive] = useState(null);
 

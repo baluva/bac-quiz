@@ -1,13 +1,17 @@
 import { useMemo } from 'react';
-import { useStore, levelInfo, resetProgress } from '../lib/store.js';
-import { countdownParts, NEXT_BAC } from '../lib/helpers.js';
+import { useStore, levelInfo, resetProgress, setSection } from '../lib/store.js';
+import { countdownParts } from '../lib/helpers.js';
+import { useNextExam } from '../lib/schedule.js';
+import NewsletterCard from './NewsletterCard.jsx';
+import PublicProfileCard from './PublicProfileCard.jsx';
 
 const SECTION_ICON = {
   'Mathématiques': '📐', 'Sciences expérimentales': '🧪', "Sciences de l'informatique": '💻',
-  'Économie et Gestion': '💼', 'Sciences techniques': '⚙️', 'Sport': '🏅', 'Lettres': '📖',
+  'Économie & Gestion': '💼', 'Sciences techniques': '⚙️', 'Sport': '🏅', 'Lettres': '📖',
 };
 
 const BADGES = [
+  { id: 'member', icon: '🪪', label: 'Membre vérifié', test: (s) => !!s.welcomeBonus },
   { id: 'first', icon: '🎯', label: 'Première réponse', test: (s) => s.answered >= 1 },
   { id: 'ten', icon: '🔟', label: '10 bonnes réponses', test: (s) => s.correct >= 10 },
   { id: 'fifty', icon: '⭐', label: '50 bonnes réponses', test: (s) => s.correct >= 50 },
@@ -23,12 +27,15 @@ export default function ProfilView({ qcm }) {
   const s = useStore();
   const lvl = levelInfo(s.xp);
   const acc = s.answered ? Math.round((s.correct / s.answered) * 100) : 0;
-  const cd = countdownParts();
+  const exam = useNextExam();
+  const cd = countdownParts(exam.target);
 
-  // Progression par spécialité (à partir des QCM disponibles + meilleurs scores).
+  // Progression par spécialité — limitée à SA spécialité si elle est choisie
+  // (chaque élève n'en a qu'une : inutile d'afficher les barres des autres).
   const bySpec = useMemo(() => {
     const m = new Map();
     for (const q of qcm.quizzes) {
+      if (s.section && q.section !== s.section) continue;
       if (!m.has(q.section)) m.set(q.section, { total: 0, done: 0, score: 0, max: 0 });
       const e = m.get(q.section);
       e.total++;
@@ -36,9 +43,10 @@ export default function ProfilView({ qcm }) {
       if (b) { e.done++; e.score += b.score; e.max += b.total; }
     }
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [qcm, s.best]);
+  }, [qcm, s.best, s.section]);
 
   const doneCount = Object.keys(s.best).length;
+  const sections = useMemo(() => [...new Set(qcm.quizzes.map((q) => q.section))].sort(), [qcm]);
 
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
@@ -62,6 +70,22 @@ export default function ProfilView({ qcm }) {
         <div className="stat"><span className="big">{doneCount}</span><span className="lbl">QCM<br />terminés</span></div>
       </div>
 
+      {/* Ma spécialité (focus) */}
+      <h3 style={{ margin: '0 0 12px' }}>🎯 Ma spécialité</h3>
+      <div className="card" style={{ marginBottom: 22, gap: 10 }}>
+        <div className="muted" style={{ fontSize: 13 }}>
+          Choisis ta section : l'app se concentre dessus (QCM + épreuves). Les autres restent accessibles via « Toutes spécialités ».
+        </div>
+        <div className="filters" style={{ margin: 0 }}>
+          <button className={`chip ${!s.section ? 'active' : ''}`} onClick={() => setSection(null)}>Toutes spécialités</button>
+          {sections.map((sec) => (
+            <button key={sec} className={`chip ${s.section === sec ? 'active' : ''}`} onClick={() => setSection(sec)}>
+              {SECTION_ICON[sec] || '📚'} {sec}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Badges */}
       <h3 style={{ margin: '0 0 12px' }}>🏅 Badges</h3>
       <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', marginBottom: 26 }}>
@@ -77,8 +101,8 @@ export default function ProfilView({ qcm }) {
         })}
       </div>
 
-      {/* Progression par spécialité */}
-      <h3 style={{ margin: '0 0 12px' }}>📊 Progression par spécialité</h3>
+      {/* Progression (limitée à sa spécialité si choisie) */}
+      <h3 style={{ margin: '0 0 12px' }}>📊 {s.section ? 'Ma progression' : 'Progression par spécialité'}</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 26 }}>
         {bySpec.map(([sec, e]) => {
           const pctDone = Math.round((e.done / e.total) * 100);
@@ -97,10 +121,16 @@ export default function ProfilView({ qcm }) {
 
       {/* Objectif bac */}
       <div className="card" style={{ marginBottom: 22, textAlign: 'center' }}>
-        <div style={{ fontSize: 15 }}>⏳ Objectif : <b>bac {NEXT_BAC.getFullYear()}</b></div>
+        <div style={{ fontSize: 15 }}>⏳ Objectif : <b>bac {exam.target.getFullYear()}</b></div>
         <div style={{ fontSize: 28, fontWeight: 800, marginTop: 4 }}>{cd.days} jours · {cd.hours} h</div>
-        <div className="lbl" style={{ marginTop: 2 }}>continue ta série chaque jour pour ne rien lâcher</div>
+        <div className="lbl" style={{ marginTop: 2 }}>{exam.label}</div>
       </div>
+
+      {/* Profil de classement */}
+      <PublicProfileCard />
+
+      {/* Newsletter */}
+      <NewsletterCard />
 
       <button className="btn ghost full" onClick={() => { if (confirm('Réinitialiser toute ta progression (XP, badges, scores) ?')) resetProgress(); }}>
         ↺ Réinitialiser ma progression

@@ -3,8 +3,13 @@ import TopBar from './components/TopBar.jsx';
 import EpreuvesView from './components/EpreuvesView.jsx';
 import QcmView from './components/QcmView.jsx';
 import ProfilView from './components/ProfilView.jsx';
+import LeaderboardView from './components/LeaderboardView.jsx';
+import Toast from './components/Toast.jsx';
+import Ticker from './components/Ticker.jsx';
+import RecoveryModal from './components/RecoveryModal.jsx';
+import { useAuth } from './lib/auth.js';
 
-const TABS = ['qcm', 'epreuves', 'profil'];
+const TABS = ['qcm', 'epreuves', 'classement', 'profil'];
 const hashTab = () => { const h = location.hash.replace('#', ''); return TABS.includes(h) ? h : 'qcm'; };
 
 export default function App() {
@@ -13,6 +18,7 @@ export default function App() {
   const [epreuves, setEpreuves] = useState(null);
   const [qcm, setQcm] = useState(null);
   const [err, setErr] = useState(null);
+  const { recovery } = useAuth();
 
   useEffect(() => {
     const onHash = () => setTabState(hashTab());
@@ -33,14 +39,29 @@ export default function App() {
 
   return (
     <>
+      <Ticker />
       <TopBar />
       <div className="wrap">
+        {tab === 'qcm' && (
+          <section className="card hero">
+            <h1>Réviser le bac tunisien, gratuitement 🇹🇳</h1>
+            <p>Télécharge toutes les épreuves officielles, entraîne-toi sur des QCM corrigés et grimpe au classement en direct.</p>
+            <div className="hero-points">
+              {epreuves && <span>📚 {epreuves.subjects.length} épreuves (2010–2025) à télécharger</span>}
+              {qcm && <span>🎯 {qcm.totalQuestions} questions de QCM corrigées</span>}
+              <span>🏆 Classement & XP en direct</span>
+            </div>
+          </section>
+        )}
         <div className="tabs">
           <button className={`tab ${tab === 'qcm' ? 'active' : ''}`} onClick={() => setTab('qcm')}>
             🎯 Entraînement QCM{qcm ? ` · ${qcm.totalQuestions}` : ''}
           </button>
           <button className={`tab ${tab === 'epreuves' ? 'active' : ''}`} onClick={() => setTab('epreuves')}>
             📚 Épreuves{epreuves ? ` · ${epreuves.subjects.length}` : ''}
+          </button>
+          <button className={`tab ${tab === 'classement' ? 'active' : ''}`} onClick={() => setTab('classement')}>
+            🏆 Classement
           </button>
           <button className={`tab ${tab === 'profil' ? 'active' : ''}`} onClick={() => setTab('profil')}>
             👤 Profil
@@ -50,7 +71,9 @@ export default function App() {
         {err && <div className="empty">Erreur de chargement des données : {err}</div>}
         {!err && (!epreuves || !qcm) && <div className="empty">Chargement…</div>}
 
-        {!err && epreuves && qcm && (
+        {tab === 'classement' && <LeaderboardView />}
+
+        {!err && epreuves && qcm && tab !== 'classement' && (
           tab === 'qcm' ? <QcmView data={qcm} />
             : tab === 'epreuves' ? <EpreuvesView data={epreuves} qcmIds={qcmIds} />
               : <ProfilView qcm={qcm} />
@@ -62,6 +85,8 @@ export default function App() {
           )}
         </div>
       </div>
+      <Toast />
+      {recovery && <RecoveryModal />}
     </>
   );
 }

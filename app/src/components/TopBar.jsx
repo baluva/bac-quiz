@@ -1,19 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useStore, levelInfo } from '../lib/store.js';
 import { countdownParts } from '../lib/helpers.js';
+import { useNextExam } from '../lib/schedule.js';
 import { useAuth, signOut, cloudEnabled } from '../lib/auth.js';
 import AuthModal from './AuthModal.jsx';
 
 export default function TopBar() {
   const s = useStore();
   const { user } = useAuth();
+  const exam = useNextExam();
   const [showAuth, setShowAuth] = useState(false);
   const lvl = levelInfo(s.xp);
-  const [cd, setCd] = useState(countdownParts());
+  const [cd, setCd] = useState(() => countdownParts(exam.target));
   useEffect(() => {
-    const t = setInterval(() => setCd(countdownParts()), 60000);
+    setCd(countdownParts(exam.target));
+    const t = setInterval(() => setCd(countdownParts(exam.target)), 60000);
     return () => clearInterval(t);
-  }, []);
+  }, [exam.target]);
   const acc = s.answered ? Math.round((s.correct / s.answered) * 100) : 0;
   const pseudo = user?.user_metadata?.pseudo || user?.email?.split('@')[0];
 
@@ -56,9 +59,9 @@ export default function TopBar() {
             <span className="big">{acc}%</span>
             <span className="lbl">réussite<br />({s.correct}/{s.answered})</span>
           </div>
-          <div className="stat" title="Prochaine session principale du bac">
+          <div className="stat" title={exam.label}>
             <span className="big">⏳ {cd.days}j</span>
-            <span className="lbl">avant le<br />bac 2027</span>
+            <span className="lbl">avant le<br />bac {exam.target.getFullYear()}</span>
           </div>
         </div>
       </div>
