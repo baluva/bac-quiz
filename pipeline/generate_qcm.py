@@ -52,6 +52,18 @@ Ta tâche :
    - donne une explication pédagogique claire pour chaque bonne réponse ;
    - associe un thème / chapitre du programme à chaque question.
 
+RÈGLE CLÉ — les questions doivent être RÉPONDABLES dans une app (l'élève ne voit
+PAS le sujet d'origine, seulement ton énoncé) :
+   - Si une question s'appuie sur un TEXTE / document / extrait / tableau / code /
+     algorithme / citation présent dans le sujet, tu DOIS recopier le passage utile
+     dans le champ `contexte` (fidèlement, en entier s'il est court). L'énoncé +
+     `contexte` doivent suffire pour répondre sans rien d'autre.
+   - N'écris JAMAIS une question qui dépend d'un VISUEL non transcriptible en texte
+     (figure, schéma, graphique, courbe, circuit, montage, diagramme, photo, carte) :
+     l'élève ne le verra pas. Choisis plutôt une autre notion du sujet.
+   - Évite les renvois du type « selon le document », « la figure ci-dessus »,
+     « l'exercice 2 » SANS fournir le contenu correspondant dans `contexte`.
+
 Reste fidèle au programme officiel tunisien et au contenu réel du sujet.
 N'invente pas de notions hors-sujet."""
 

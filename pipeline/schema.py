@@ -19,6 +19,16 @@ class Difficulte(str, Enum):
 
 class Question(BaseModel):
     enonce: str = Field(description="L'énoncé de la question (dans la langue du sujet)")
+    contexte: str = Field(
+        default="",
+        description=(
+            "Texte support OBLIGATOIRE si la question s'appuie sur un document, "
+            "texte, extrait, tableau, code, algorithme ou citation présent dans le "
+            "sujet. Recopie ici fidèlement le passage nécessaire (en entier si court) "
+            "pour qu'on puisse répondre SANS voir le sujet d'origine. Laisse vide "
+            "uniquement si la question est répondable seule (connaissance pure)."
+        ),
+    )
     choix: List[str] = Field(description="Les propositions de réponse (4 de préférence)")
     index_correct: int = Field(
         description="Index 0-based de la bonne réponse dans 'choix'"
