@@ -16,7 +16,7 @@ const _nextBac =
 export const NEXT_BAC = new Date(_nextBac.date);
 export const NEXT_BAC_LABEL = _nextBac.label;
 
-export const sessionLabel = (s) => (s === 'controle' ? 'Contrôle' : 'Principale');
+export const sessionLabel = (s) => (s === 'controle' ? 'Contrôle' : s === 'pratique' ? 'Pratique' : 'Principale');
 
 export function pdfUrl(file) {
   return `${EPREUVES_BASE}/${encodeURIComponent(file)}`;

@@ -1,8 +1,8 @@
 // Génère public/robots.txt et public/sitemap.xml.
 // L'URL du site vient de VITE_SITE_URL (env Netlify), sinon du fichier .env
-// local, sinon d'un défaut. NB : l'app étant une SPA en hash routing
-// (#qcm/#epreuves/#profil), les ancres ne sont PAS des URL indexables → le
-// sitemap ne contient que la page d'accueil.
+// local, sinon d'un défaut. L'app utilise désormais un routage par CHEMIN
+// (/, /epreuves, /classement, /profil) : chaque onglet est une vraie URL
+// indexable, toutes listées dans le sitemap.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,14 +37,25 @@ Sitemap: ${SITE}/sitemap.xml
 fs.writeFileSync(path.join(PUBLIC_DIR, 'robots.txt'), robots);
 
 // ---- sitemap.xml ----
+// Une entrée par page indexable (routage par chemin). Priorité décroissante :
+// accueil (QCM) et épreuves portent le contenu à fort potentiel de recherche ;
+// classement et profil sont listés mais secondaires.
+const PAGES = [
+  { path: '/',            changefreq: 'weekly',  priority: '1.0' },
+  { path: '/epreuves',    changefreq: 'weekly',  priority: '0.9' },
+  { path: '/tp',          changefreq: 'weekly',  priority: '0.8' },
+  { path: '/classement',  changefreq: 'daily',   priority: '0.5' },
+  { path: '/profil',      changefreq: 'monthly', priority: '0.3' },
+];
+const urls = PAGES.map((p) => `  <url>
+    <loc>${SITE}${p.path}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`).join('\n');
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${SITE}/</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+${urls}
 </urlset>
 `;
 fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap.xml'), sitemap);

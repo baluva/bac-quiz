@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TopBar from './components/TopBar.jsx';
 import EpreuvesView from './components/EpreuvesView.jsx';
 import QcmView from './components/QcmView.jsx';
+import TpView from './components/TpView.jsx';
 import ProfilView from './components/ProfilView.jsx';
 import LeaderboardView from './components/LeaderboardView.jsx';
 import Toast from './components/Toast.jsx';
@@ -9,33 +10,120 @@ import Ticker from './components/Ticker.jsx';
 import RecoveryModal from './components/RecoveryModal.jsx';
 import { useAuth } from './lib/auth.js';
 
-const TABS = ['qcm', 'epreuves', 'classement', 'profil'];
-const hashTab = () => { const h = location.hash.replace('#', ''); return TABS.includes(h) ? h : 'qcm'; };
+const TABS = ['qcm', 'epreuves', 'tp', 'classement', 'profil'];
+// Chaque onglet est une VRAIE URL indexable (plus de #ancre).
+const TAB_PATH = { qcm: '/', epreuves: '/epreuves', tp: '/tp', classement: '/classement', profil: '/profil' };
+const PATH_TAB = { '/': 'qcm', '/qcm': 'qcm', '/epreuves': 'epreuves', '/tp': 'tp', '/classement': 'classement', '/profil': 'profil' };
+const SITE = (import.meta.env.VITE_SITE_URL || 'https://bacquiz-tn.netlify.app').replace(/\/+$/, '');
+const BASE = import.meta.env.BASE_URL || '/'; // préfixe des assets (data, etc.)
+
+// Onglet correspondant à l'URL courante (+ migration des anciens liens #ancre).
+function tabFromLocation() {
+  const h = location.hash.replace('#', '');
+  if (TABS.includes(h)) return h;
+  const p = location.pathname.replace(/\/+$/, '') || '/';
+  return PATH_TAB[p] || 'qcm';
+}
+
+// --- SEO par page : un titre + une description + un canonical propres à chaque URL.
+function setMetaTag(attr, key, content) {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) { el = document.createElement('meta'); el.setAttribute(attr, key); document.head.appendChild(el); }
+  el.setAttribute('content', content);
+}
+function setCanonical(url) {
+  let el = document.head.querySelector('link[rel="canonical"]');
+  if (!el) { el = document.createElement('link'); el.setAttribute('rel', 'canonical'); document.head.appendChild(el); }
+  el.setAttribute('href', url);
+}
+function seoFor(tab, epreuves, qcm) {
+  const nbE = epreuves?.subjects?.length;
+  const nbQ = qcm?.totalQuestions;
+  const yMax = epreuves?.years?.[0];
+  const yMin = epreuves?.years?.at(-1);
+  const annees = (yMin && yMax) ? ` (${yMin}–${yMax})` : '';
+  switch (tab) {
+    case 'epreuves':
+      return {
+        title: `Épreuves du bac tunisien à télécharger en PDF${annees} — Bac Quiz 🇹🇳`,
+        desc: `Télécharge ${nbE ? nbE + ' ' : 'les '}épreuves officielles du baccalauréat tunisien${annees}, toutes spécialités : maths, sciences expérimentales, informatique, technique, économie & gestion, sport et lettres. Sessions principale et de contrôle.`,
+      };
+    case 'tp':
+      return {
+        title: 'TP — Entraînement algo en Python & bacs pratiques — Bac Quiz 🇹🇳',
+        desc: "Entraîne-toi à programmer en Python directement dans ton navigateur (épreuve pratique du bac tunisien) avec correction automatique, et télécharge les sujets des bacs pratiques (TIC & informatique).",
+      };
+    case 'classement':
+      return {
+        title: 'Classement en direct des élèves — Bac Quiz 🇹🇳',
+        desc: "Affronte les autres élèves du bac tunisien : gagne de l'XP en répondant aux QCM corrigés et grimpe dans le classement en temps réel.",
+      };
+    case 'profil':
+      return {
+        title: 'Mon profil & ma progression — Bac Quiz 🇹🇳',
+        desc: 'Suis ta progression de révision du bac tunisien : XP, séries, statistiques par matière et historique de tes QCM.',
+      };
+    default: // qcm (accueil)
+      return {
+        title: `Bac Quiz 🇹🇳 — ${nbE ? nbE + ' annales' : 'Annales'} & ${nbQ ? nbQ + ' QCM' : 'QCM'} du bac tunisien gratuits`,
+        desc: `Réviser le bac tunisien gratuitement : ${nbE ? nbE + ' épreuves' : 'les épreuves'} officielles${annees} à télécharger en PDF et ${nbQ ? nbQ + ' questions' : 'des QCM'} de QCM corrigées pour s'entraîner. Toutes spécialités.`,
+      };
+  }
+}
+function applyHead(tab, epreuves, qcm) {
+  const { title, desc } = seoFor(tab, epreuves, qcm);
+  const url = SITE + TAB_PATH[tab];
+  document.title = title;
+  setMetaTag('name', 'description', desc);
+  setMetaTag('property', 'og:title', title);
+  setMetaTag('property', 'og:description', desc);
+  setMetaTag('property', 'og:url', url);
+  setMetaTag('name', 'twitter:title', title);
+  setMetaTag('name', 'twitter:description', desc);
+  setCanonical(url);
+}
 
 export default function App() {
-  const [tab, setTabState] = useState(hashTab);
-  const setTab = (t) => { setTabState(t); history.replaceState(null, '', `#${t}`); };
+  const [tab, setTabState] = useState(tabFromLocation);
+  const setTab = (t) => {
+    setTabState(t);
+    const path = TAB_PATH[t];
+    if (location.pathname !== path || location.hash) history.pushState({ tab: t }, '', path);
+  };
   const [epreuves, setEpreuves] = useState(null);
   const [qcm, setQcm] = useState(null);
+  const [pratique, setPratique] = useState(null);
   const [err, setErr] = useState(null);
   const { recovery } = useAuth();
 
   useEffect(() => {
-    const onHash = () => setTabState(hashTab());
-    window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
+    // Migration : un ancien lien en #onglet devient une URL propre (/onglet).
+    if (location.hash) {
+      const h = location.hash.replace('#', '');
+      history.replaceState(null, '', TABS.includes(h) ? TAB_PATH[h] : location.pathname);
+    }
+    const onPop = () => setTabState(tabFromLocation());
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
   }, []);
+
+  // Met à jour le titre/description/canonical à chaque changement de page.
+  useEffect(() => { applyHead(tab, epreuves, qcm); }, [tab, epreuves, qcm]);
 
   useEffect(() => {
     Promise.all([
-      fetch('./data/epreuves.json').then((r) => r.json()),
-      fetch('./data/qcm.json').then((r) => r.json()),
+      fetch(`${BASE}data/epreuves.json`).then((r) => r.json()),
+      fetch(`${BASE}data/qcm.json`).then((r) => r.json()),
     ])
       .then(([e, q]) => { setEpreuves(e); setQcm(q); })
       .catch((e) => setErr(String(e)));
   }, []);
 
-  const qcmIds = useMemo(() => new Set((qcm?.quizzes || []).map((q) => q.id)), [qcm]);
+  // Données des épreuves pratiques (onglet TP) — non bloquant : le trainer marche
+  // même si ce fichier manque.
+  useEffect(() => {
+    fetch(`${BASE}data/pratique.json`).then((r) => r.json()).then(setPratique).catch(() => {});
+  }, []);
 
   return (
     <>
@@ -60,6 +148,9 @@ export default function App() {
           <button className={`tab ${tab === 'epreuves' ? 'active' : ''}`} onClick={() => setTab('epreuves')}>
             📚 Épreuves{epreuves ? ` · ${epreuves.subjects.length}` : ''}
           </button>
+          <button className={`tab ${tab === 'tp' ? 'active' : ''}`} onClick={() => setTab('tp')}>
+            💻 TP{pratique ? ` · ${pratique.subjects.length}` : ''}
+          </button>
           <button className={`tab ${tab === 'classement' ? 'active' : ''}`} onClick={() => setTab('classement')}>
             🏆 Classement
           </button>
@@ -69,13 +160,15 @@ export default function App() {
         </div>
 
         {err && <div className="empty">Erreur de chargement des données : {err}</div>}
-        {!err && (!epreuves || !qcm) && <div className="empty">Chargement…</div>}
+        {!err && (!epreuves || !qcm) && tab !== 'tp' && <div className="empty">Chargement…</div>}
 
         {tab === 'classement' && <LeaderboardView />}
 
-        {!err && epreuves && qcm && tab !== 'classement' && (
+        {tab === 'tp' && <TpView pratique={pratique} />}
+
+        {!err && epreuves && qcm && tab !== 'classement' && tab !== 'tp' && (
           tab === 'qcm' ? <QcmView data={qcm} />
-            : tab === 'epreuves' ? <EpreuvesView data={epreuves} qcmIds={qcmIds} />
+            : tab === 'epreuves' ? <EpreuvesView data={epreuves} />
               : <ProfilView qcm={qcm} />
         )}
 

@@ -81,7 +81,7 @@ const groups = new Map();
 let skipped = 0;
 for (const f of pdfFiles) {
   const p = parsePdf(f);
-  if (!p) { skipped++; continue; }
+  if (!p) { if (!/^bac-pratique-/i.test(f)) skipped++; continue; }
   const id = `${p.year}_${p.session}_${p.sectionKey}_${p.matiereKey}`;
   if (!groups.has(id)) {
     groups.set(id, {
@@ -117,6 +117,82 @@ const epreuves = { generatedAt: new Date().toISOString(), sections: usedSections
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.writeFileSync(path.join(OUT_DIR, 'epreuves.json'), JSON.stringify(epreuves));
 
+// ---- Bac PRATIQUE (épreuves pratiques / TP, source reviserbac.tn) ----
+// Fichiers nommés `bac-pratique-<JJMMAAAA>-<code>-<créneau|corrigeN>.pdf`
+// (ignorés par parsePdf car sans « _ »). On les regroupe par (année, section)
+// → une carte par filière et par an, avec tous les sujets (créneaux) + corrigés.
+const PRAT_SECTION = {
+  algo: ['informatique', "Sciences de l'informatique", '💻'],
+  sti: ['informatique', "Sciences de l'informatique", '💻'],
+  sc: ['sciences_ex', 'Sciences expérimentales', '🧪'],
+  tic: ['sciences_ex', 'Sciences expérimentales', '🧪'],
+  eco: ['economie_gestion', 'Économie & Gestion', '💼'],
+  lettres: ['lettre', 'Lettres', '📖'],
+  sport: ['sport', 'Sport', '🏅'],
+};
+const PRAT_MATIERE = {
+  informatique: "Épreuve pratique d'informatique",
+  sciences_ex: 'Épreuve pratique (TIC)',
+  economie_gestion: 'Épreuve pratique (TIC)',
+  lettre: 'Épreuve pratique (TIC)',
+  sport: 'Épreuve pratique (TIC)',
+};
+const PRAT_RE = /^bac-pratique-\d{2}\d{2}(\d{4})-([a-z]+)-(.+)\.pdf$/i;
+function prettySlot(tail) {
+  const t = tail.toLowerCase();
+  let m;
+  if ((m = t.match(/^(\d{1,2})h(\d{2})?$/))) return m[2] ? `${m[1]}h${m[2]}` : `${m[1]}h`;
+  if ((m = t.match(/^s(\d+)$/))) return `Série ${m[1]}`;
+  return tail;
+}
+const pratGroups = new Map();
+for (const f of pdfFiles) {
+  const m = f.match(PRAT_RE);
+  if (!m) continue;
+  const year = parseInt(m[1], 10);
+  const code = m[2].toLowerCase();
+  const tail = m[3];
+  const sec = PRAT_SECTION[code];
+  if (!sec) { continue; }
+  const [sectionKey, sectionLabel, sectionIcon] = sec;
+  const id = `${year}_pratique_${sectionKey}`;
+  if (!pratGroups.has(id)) {
+    pratGroups.set(id, {
+      id, year, session: 'pratique',
+      sectionKey, sectionLabel, sectionIcon,
+      matiereKey: 'pratique', matiereLabel: PRAT_MATIERE[sectionKey] || 'Épreuve pratique',
+      docs: [],
+    });
+  }
+  const cm = tail.match(/^corrige(\d+)$/i);
+  pratGroups.get(id).docs.push(cm
+    ? { file: f, kind: 'corrige', label: `Corrigé ${cm[1]}`, order: 100 + parseInt(cm[1], 10) }
+    : { file: f, kind: 'enonce', label: `Sujet · ${prettySlot(tail)}`, order: 0 });
+}
+const pratSubjects = [...pratGroups.values()].sort((a, b) =>
+  b.year - a.year || a.sectionLabel.localeCompare(b.sectionLabel));
+for (const s of pratSubjects) {
+  s.docs.sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+  s.docs.forEach((d) => delete d.order);
+}
+const pratSections = SECTIONS
+  .filter(([k]) => pratSubjects.some((s) => s.sectionKey === k))
+  .map(([key, label, icon]) => ({ key, label, icon, count: pratSubjects.filter((s) => s.sectionKey === key).length }));
+const pratYears = [...new Set(pratSubjects.map((s) => s.year))].sort((a, b) => b - a);
+const pratNbDocs = pratSubjects.reduce((n, s) => n + s.docs.length, 0);
+fs.writeFileSync(path.join(OUT_DIR, 'pratique.json'),
+  JSON.stringify({ generatedAt: new Date().toISOString(), sections: pratSections, years: pratYears, subjects: pratSubjects }));
+
+// ---- Contextes manuels (overlay tracké) ----
+// Certaines questions renvoyaient à un document (annexe, tableau, texte) absent
+// du JSON brut → exclues par le filtre qualité. On rétablit leur `contexte` à
+// partir des PDF source via ce fichier versionné (clé = énoncé exact), ce qui les
+// rend de nouveau répondables sans dépendre des sorties pipeline (gitignorées).
+const MANUAL_CTX_FILE = path.resolve(ROOT, '../pipeline/manual_contextes.json');
+let MANUAL_CTX = {};
+try { MANUAL_CTX = JSON.parse(fs.readFileSync(MANUAL_CTX_FILE, 'utf-8')); } catch { /* pas d'overlay */ }
+let ctxApplied = 0, ansFixed = 0;
+
 // ---- QCM ----
 const qcmFiles = fs.existsSync(QCM_DIR) ? fs.readdirSync(QCM_DIR).filter((f) => f.endsWith('.json')) : [];
 const quizzes = [];
@@ -125,6 +201,21 @@ for (const f of qcmFiles) {
   try {
     const d = JSON.parse(fs.readFileSync(path.join(QCM_DIR, f), 'utf-8'));
     if (!Array.isArray(d.questions) || !d.questions.length) continue;
+    // Applique l'overlay manuel (avant le filtre qualité) pour ce QCM. Chaque
+    // entrée vaut soit une chaîne (= contexte seul), soit un objet
+    // { ctx?, ans?, exp? } qui ajoute le contexte ET corrige la bonne réponse /
+    // l'explication (réponses générées « à l'aveugle » parfois erronées).
+    const overlay = MANUAL_CTX[f.replace(/\.json$/, '')] || {};
+    for (const q of d.questions) {
+      const o = overlay[(q.enonce || '').trim()];
+      if (!o) continue;
+      const ctx = typeof o === 'string' ? o : o.ctx;
+      if (ctx && !((q.contexte || '').trim())) { q.contexte = ctx; ctxApplied++; }
+      if (typeof o === 'object') {
+        if (Number.isInteger(o.ans) && o.ans !== q.index_correct) { q.index_correct = o.ans; ansFixed++; }
+        if (o.exp) q.explication = o.exp;
+      }
+    }
     // Filtre qualité : on n'expose QUE les questions répondables sans voir le
     // sujet (cf. scripts/qcm-quality.mjs). La source JSON reste intacte.
     const answerable = d.questions.filter(isAnswerable);
@@ -154,4 +245,5 @@ const totalQ = quizzes.reduce((n, q) => n + q.nbQuestions, 0);
 fs.writeFileSync(path.join(OUT_DIR, 'qcm.json'), JSON.stringify({ generatedAt: new Date().toISOString(), totalQuestions: totalQ, quizzes }));
 
 console.log(`✅ epreuves.json : ${subjects.length} sujets (${pdfFiles.length} PDF, ${skipped} ignorés), ${usedSections.length} spécialités, années ${years.at(-1)}–${years[0]}`);
-console.log(`✅ qcm.json      : ${quizzes.length} QCM, ${totalQ} questions (${droppedQ} inrépondables exclues)`);
+console.log(`✅ qcm.json      : ${quizzes.length} QCM, ${totalQ} questions (${droppedQ} inrépondables exclues, ${ctxApplied} contextes manuels, ${ansFixed} réponses corrigées)`);
+console.log(`✅ pratique.json : ${pratSubjects.length} épreuves pratiques (${pratNbDocs} documents), ${pratSections.length} spécialités, années ${pratYears.at(-1)}–${pratYears[0]}`);

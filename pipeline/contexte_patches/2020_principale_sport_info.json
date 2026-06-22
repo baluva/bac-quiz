@@ -1,0 +1,4 @@
+{
+  "5": "Tableur « Tab1 » de gestion de stock d'une société d'équipements sportifs. Colonnes : A = Article, B = Quantité disponible, C = Quantité vendue, D = Quantité restante, E = En rupture de stock. Les articles occupent les lignes 2 à 10. Règle : Quantité restante = Quantité disponible − Quantité vendue.",
+  "6": "Tableur « Tab1 » de gestion de stock. Colonnes : A = Article, B = Quantité disponible, C = Quantité vendue, D = Quantité restante, E = En rupture de stock (lignes 2 à 10). Un article est considéré « en rupture de stock » lorsque sa quantité restante (colonne D) est strictement inférieure à 5."
+}

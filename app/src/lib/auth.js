@@ -50,6 +50,20 @@ export async function signIn(email, password) {
   if (error) throw error;
 }
 
+// Connexion via Google (OAuth). Redirige le navigateur vers Google puis revient
+// sur SITE ; supabase-js récupère la session au retour (onAuthStateChange).
+export async function signInWithGoogle() {
+  if (!supabase) throw new Error('Supabase non configuré');
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: SITE,
+      queryParams: { prompt: 'select_account' },
+    },
+  });
+  if (error) throw error;
+}
+
 export async function signOut() {
   if (supabase) await supabase.auth.signOut();
 }

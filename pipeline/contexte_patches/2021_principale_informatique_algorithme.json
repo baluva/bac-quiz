@@ -1,0 +1,3 @@
+{
+  "10": "Tableau de conversion T indexé par les caractères '0' à '7' : chaque case T[c] contient l'écriture binaire, sur 3 chiffres, du chiffre octal c (par exemple T['0'] = \"000\", T['2'] = \"010\", T['7'] = \"111\")."
+}

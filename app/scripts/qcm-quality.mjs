@@ -14,11 +14,17 @@ export const DOC = /\b(le document|du document|au document|selon le document|le 
 export const CONTEXTE_MIN = 40; // en-dessous, le contexte ne "montre" rien d'utile
 
 // Retourne 'VISUEL', 'DOC' ou null (= répondable).
+// NB : DOC ne s'évalue que sur l'ÉNONCÉ. Une question qui exige un document le
+// signale toujours dans son énoncé (« selon le document/annexe/tableau… ») ;
+// chercher ces termes dans les CHOIX produisait des faux positifs (ex. « le
+// document principal » dans une réponse sur le publipostage, « de l'exercice »
+// dans une réponse de comptabilité) qui excluaient des questions de cours.
 export function classify(q) {
   const ctx = (q.contexte || '').trim();
-  const hay = `${q.enonce || ''} ${(q.choix || []).join(' ')}`;
+  const enonce = q.enonce || '';
+  const hay = `${enonce} ${(q.choix || []).join(' ')}`;
   if (VISUEL.test(hay)) return 'VISUEL';
-  if (DOC.test(hay) && ctx.length < CONTEXTE_MIN) return 'DOC';
+  if (DOC.test(enonce) && ctx.length < CONTEXTE_MIN) return 'DOC';
   return null;
 }
 

@@ -30,6 +30,44 @@ function servePdfs() {
   };
 }
 
+// Injecte les VRAIS compteurs de contenu dans index.html (title, description,
+// Open Graph, noscript, données structurées) à partir des JSON de données, pour
+// que le SEO ne soit jamais périmé après un ajout d'épreuves/QCM.
+// Remplace les jetons __NB_EPREUVES__, __NB_QUESTIONS__, __ANNEE_MIN/MAX__ et
+// __SECTIONS_LI__ (puces <li> des spécialités pour le <noscript> indexable).
+function seoCounts() {
+  function read(rel) {
+    return JSON.parse(fs.readFileSync(path.resolve(__dirname, rel), 'utf-8'));
+  }
+  function compute() {
+    let nbEpreuves = 0, nbQuestions = 0, anneeMin = '', anneeMax = '', sectionsLi = '';
+    try {
+      const ep = read('public/data/epreuves.json');
+      nbEpreuves = ep.subjects.length;
+      anneeMax = Math.max(...ep.years);
+      anneeMin = Math.min(...ep.years);
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      sectionsLi = (ep.sections || [])
+        .map((s) => `<li>${esc(s.label)} — ${s.count} épreuves</li>`)
+        .join('');
+    } catch { /* données absentes : on laisse les jetons (build dégradé) */ }
+    try { nbQuestions = read('public/data/qcm.json').totalQuestions; } catch { /* idem */ }
+    return { nbEpreuves, nbQuestions, anneeMin, anneeMax, sectionsLi };
+  }
+  return {
+    name: 'seo-counts',
+    transformIndexHtml(html) {
+      const c = compute();
+      return html
+        .replaceAll('__NB_EPREUVES__', String(c.nbEpreuves))
+        .replaceAll('__NB_QUESTIONS__', String(c.nbQuestions))
+        .replaceAll('__ANNEE_MIN__', String(c.anneeMin))
+        .replaceAll('__ANNEE_MAX__', String(c.anneeMax))
+        .replaceAll('__SECTIONS_LI__', c.sectionsLi);
+    },
+  };
+}
+
 // Injecte le beacon Cloudflare Web Analytics UNIQUEMENT si un token est défini
 // (VITE_CF_BEACON_TOKEN). Pas de cookie, pas de consentement requis.
 function cloudflareAnalytics(token) {
@@ -46,8 +84,8 @@ function cloudflareAnalytics(token) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
   return {
-    base: './',
-    plugins: [react(), servePdfs(), cloudflareAnalytics(env.VITE_CF_BEACON_TOKEN)].filter(Boolean),
+    base: '/',
+    plugins: [react(), servePdfs(), seoCounts(), cloudflareAnalytics(env.VITE_CF_BEACON_TOKEN)].filter(Boolean),
     server: { port: 5173, open: true },
   };
 });

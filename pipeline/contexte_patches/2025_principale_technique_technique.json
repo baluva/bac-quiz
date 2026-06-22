@@ -1,0 +1,3 @@
+{
+  "5": "Extrait du document constructeur des moteurs asynchrones triphasés (couplage triangle, réseau 400 V – 50 Hz) :\n• LS132S : Pₙ = 4 kW ; nₙ = 1440 tr/min ; Tₙ = 26,5 N.m ; Iₙ = 8,5 A\n• LS132M : Pₙ = 7,5 kW ; nₙ = 1455 tr/min ; Tₙ = 49,2 N.m ; Iₙ = 15 A\n• LS160MP : Pₙ = 11 kW ; nₙ = 1455 tr/min ; Tₙ = 72,2 N.m ; Iₙ = 21 A\n(Iₙ = courant nominal, Tₙ = couple nominal.)"
+}

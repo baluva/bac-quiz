@@ -7,11 +7,13 @@ import { showToast } from './toast.js';
 const KEY = 'bacquiz:v1';
 const WELCOME_BONUS = 250; // XP offerts à la 1ʳᵉ connexion avec un compte
 const DOWNLOAD_XP = 5;   // XP gagnés en téléchargeant une épreuve (1 fois par épreuve)
+const EXERCISE_XP = 20; // XP gagnés en résolvant un exercice algo (1 fois par exercice)
 const DEFAULT = {
   xp: 0, answered: 0, correct: 0, streak: 0, lastDay: null, best: {},
   section: null,        // spécialité choisie (label) → l'app se concentre dessus
   welcomeBonus: false,  // bonus de bienvenue déjà accordé ?
   downloads: {},        // épreuves déjà téléchargées (anti-farm, local) → { [id]: 1 }
+  solved: {},           // exercices algo résolus (anti-farm, local) → { [id]: 1 }
 };
 
 function read() {
@@ -148,6 +150,16 @@ export function recordDownload(epreuveId) {
   if (got[epreuveId]) return; // déjà comptée → pas de nouvel XP
   commit({ ...state, downloads: { ...got, [epreuveId]: 1 }, xp: state.xp + DOWNLOAD_XP });
   showToast(`⬇️ +${DOWNLOAD_XP} XP — merci d'avoir téléchargé une épreuve !`);
+}
+
+// Exercice algo (TP) résolu = +XP, une seule fois par exercice (anti-farm local).
+export function recordExercise(id) {
+  if (!id) return false;
+  const got = state.solved || {};
+  if (got[id]) return false; // déjà résolu → pas de nouvel XP
+  commit({ ...state, solved: { ...got, [id]: 1 }, xp: state.xp + EXERCISE_XP });
+  showToast(`✅ +${EXERCISE_XP} XP — exercice résolu !`);
+  return true;
 }
 
 // Réinitialise la progression mais garde le statut membre + la spécialité.

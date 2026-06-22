@@ -62,7 +62,8 @@ export default function QuizPlayer({ quiz, onExit }) {
 
       {cur.contexte && (
         <div className="explain" style={{ borderLeftColor: 'var(--accent2)', marginTop: 0, marginBottom: 18 }}>
-          <b>📄 Document</b><br />{cur.contexte}
+          <b>📄 Document</b>
+          <div style={{ whiteSpace: 'pre-line', marginTop: 4 }}>{cur.contexte}</div>
         </div>
       )}
 

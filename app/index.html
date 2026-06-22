@@ -8,9 +8,9 @@
     <meta name="google-site-verification" content="zJKnZBKmU-85C2Uijv9D7k83akUPuuVmr5gvLKR_7Do" />
     <meta name="google-site-verification" content="495xjjSDW9nkCiuze5qksJIAgH3xDmP2yF6dibl_4NQ" />
 
-    <title>Bac Quiz 🇹🇳 — Annales, épreuves & QCM du bac tunisien (2020–2025)</title>
-    <meta name="description" content="Réviser le bac tunisien gratuitement : 528 épreuves (toutes spécialités, 2020 à 2025) à consulter ou télécharger en PDF, et 508 questions de QCM pour s'entraîner. Maths, sciences, informatique, économie, technique, sport." />
-    <meta name="keywords" content="bac tunisien, bac tunisie, annales bac, épreuves bac, sujets bac, QCM bac, corrigés bac, révision bac, bac 2025, bac math, bac sciences, bac informatique, bac économie gestion, bac technique" />
+    <title>Bac Quiz 🇹🇳 — __NB_EPREUVES__ annales & QCM du bac tunisien (__ANNEE_MIN__–__ANNEE_MAX__)</title>
+    <meta name="description" content="Réviser le bac tunisien gratuitement : __NB_EPREUVES__ épreuves officielles (toutes spécialités, __ANNEE_MIN__ à __ANNEE_MAX__) à consulter ou télécharger en PDF, et __NB_QUESTIONS__ questions de QCM corrigées pour s'entraîner. Maths, sciences, informatique, économie & gestion, technique, sport, lettres." />
+    <meta name="keywords" content="bac tunisien, bac tunisie, annales bac, épreuves bac, sujets bac, QCM bac, corrigés bac, révision bac, bac 2025, bac 2024, bac math, bac sciences expérimentales, bac informatique, bac économie gestion, bac technique, bac sport, bac lettres, sujets bac PDF, baccalauréat tunisie" />
     <meta name="author" content="Bac Quiz" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="%VITE_SITE_URL%/" />
@@ -19,7 +19,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Bac Quiz 🇹🇳" />
     <meta property="og:title" content="Bac Quiz 🇹🇳 — Annales & QCM du bac tunisien" />
-    <meta property="og:description" content="528 épreuves du bac tunisien (2020–2025) à télécharger + 508 questions de QCM pour réviser. Gratuit, toutes spécialités." />
+    <meta property="og:description" content="__NB_EPREUVES__ épreuves du bac tunisien (__ANNEE_MIN__–__ANNEE_MAX__) à télécharger + __NB_QUESTIONS__ questions de QCM corrigées pour réviser. Gratuit, toutes spécialités." />
     <meta property="og:url" content="%VITE_SITE_URL%/" />
     <meta property="og:image" content="%VITE_SITE_URL%/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -30,7 +30,7 @@
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Bac Quiz 🇹🇳 — Annales & QCM du bac tunisien" />
-    <meta name="twitter:description" content="528 épreuves du bac tunisien (2020–2025) à télécharger + 508 questions de QCM pour réviser. Gratuit, toutes spécialités." />
+    <meta name="twitter:description" content="__NB_EPREUVES__ épreuves du bac tunisien (__ANNEE_MIN__–__ANNEE_MAX__) à télécharger + __NB_QUESTIONS__ questions de QCM corrigées pour réviser. Gratuit, toutes spécialités." />
     <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -47,7 +47,7 @@
           "@id": "%VITE_SITE_URL%/#website",
           "url": "%VITE_SITE_URL%/",
           "name": "Bac Quiz",
-          "description": "Annales, épreuves et QCM du bac tunisien (2020–2025), gratuit.",
+          "description": "__NB_EPREUVES__ annales et __NB_QUESTIONS__ QCM du bac tunisien (__ANNEE_MIN__–__ANNEE_MAX__), gratuit.",
           "inLanguage": "fr-TN"
         },
         {
@@ -56,8 +56,59 @@
           "name": "Bac Quiz 🇹🇳",
           "url": "%VITE_SITE_URL%/",
           "logo": "%VITE_SITE_URL%/og-image.png",
-          "description": "Plateforme gratuite de révision du baccalauréat tunisien : épreuves officielles à télécharger et entraînement par QCM.",
+          "description": "Plateforme gratuite de révision du baccalauréat tunisien : __NB_EPREUVES__ épreuves officielles à télécharger et __NB_QUESTIONS__ questions de QCM pour s'entraîner.",
           "areaServed": "TN"
+        },
+        {
+          "@type": "CollectionPage",
+          "@id": "%VITE_SITE_URL%/#collection",
+          "url": "%VITE_SITE_URL%/",
+          "name": "Annales du bac tunisien par spécialité",
+          "isPartOf": { "@id": "%VITE_SITE_URL%/#website" },
+          "about": "Épreuves officielles du baccalauréat tunisien de __ANNEE_MIN__ à __ANNEE_MAX__",
+          "mainEntity": {
+            "@type": "ItemList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Mathématiques" },
+              { "@type": "ListItem", "position": 2, "name": "Sciences expérimentales" },
+              { "@type": "ListItem", "position": 3, "name": "Sciences de l'informatique" },
+              { "@type": "ListItem", "position": 4, "name": "Sciences techniques" },
+              { "@type": "ListItem", "position": 5, "name": "Économie & Gestion" },
+              { "@type": "ListItem", "position": 6, "name": "Sport" },
+              { "@type": "ListItem", "position": 7, "name": "Lettres" }
+            ]
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "%VITE_SITE_URL%/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Le site Bac Quiz est-il gratuit ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Oui, Bac Quiz est 100% gratuit et sans inscription obligatoire. Toutes les épreuves et tous les QCM sont accessibles librement." }
+            },
+            {
+              "@type": "Question",
+              "name": "Quelles années d'annales du bac tunisien sont disponibles ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Les épreuves officielles du baccalauréat tunisien sont disponibles de __ANNEE_MIN__ à __ANNEE_MAX__, sessions principale et de contrôle, soit __NB_EPREUVES__ épreuves au total." }
+            },
+            {
+              "@type": "Question",
+              "name": "Quelles spécialités du bac sont couvertes ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Toutes les sections : Mathématiques, Sciences expérimentales, Sciences de l'informatique, Sciences techniques, Économie & Gestion, Sport et Lettres." }
+            },
+            {
+              "@type": "Question",
+              "name": "Puis-je télécharger les sujets du bac en PDF ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Oui, chaque épreuve peut être consultée en ligne ou téléchargée en PDF, avec lorsqu'ils existent les documents complémentaires et corrigés." }
+            },
+            {
+              "@type": "Question",
+              "name": "Comment réviser avec les QCM ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Bac Quiz propose __NB_QUESTIONS__ questions de QCM corrigées, classées par matière et par année, avec une explication pour chaque réponse." }
+            }
+          ]
         }
       ]
     }
@@ -68,7 +119,12 @@
     <!-- Contenu de secours indexable si le JS ne s'exécute pas (crawlers) -->
     <noscript>
       <h1>Bac Quiz 🇹🇳 — Réviser le bac tunisien</h1>
-      <p>528 épreuves du bac tunisien (2020 à 2025), toutes spécialités (mathématiques, sciences expérimentales, sciences de l'informatique, sciences techniques, économie &amp; gestion, sport), à consulter et télécharger en PDF, plus 508 questions de QCM pour s'entraîner. Activez JavaScript pour utiliser l'application.</p>
+      <p>__NB_EPREUVES__ épreuves officielles du baccalauréat tunisien de __ANNEE_MIN__ à __ANNEE_MAX__ (sessions principale et de contrôle), à consulter et télécharger gratuitement en PDF, plus __NB_QUESTIONS__ questions de QCM corrigées pour s'entraîner.</p>
+      <h2>Épreuves par spécialité</h2>
+      <ul>__SECTIONS_LI__</ul>
+      <h2>Années disponibles</h2>
+      <p>Annales du bac tunisien de __ANNEE_MIN__ à __ANNEE_MAX__ : sujets, documents complémentaires et corrigés en mathématiques, sciences expérimentales, sciences de l'informatique, sciences techniques, économie &amp; gestion, sport et lettres.</p>
+      <p>Activez JavaScript pour utiliser l'application interactive (recherche, filtres, QCM, profil).</p>
     </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>

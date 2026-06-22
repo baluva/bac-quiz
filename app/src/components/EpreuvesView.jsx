@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { sessionLabel, pdfUrl, downloadPdf } from '../lib/helpers.js';
 import { getState, recordDownload } from '../lib/store.js';
 
-export default function EpreuvesView({ data, qcmIds }) {
+export default function EpreuvesView({ data }) {
   const { sections, years, subjects } = data;
   // Si une spécialité est choisie (compte/profil), on s'y concentre par défaut.
   const [spec, setSpec] = useState(() => {
@@ -59,7 +59,6 @@ export default function EpreuvesView({ data, qcmIds }) {
           {filtered.map((s) => {
             const enonce = s.docs.find((d) => d.kind === 'enonce') || s.docs[0];
             const extra = s.docs.filter((d) => d !== enonce);
-            const hasQcm = qcmIds.has(s.id);
             return (
               <div className="card" key={s.id + s.docs[0].file}>
                 <div className="ico">{s.sectionIcon}</div>
@@ -69,7 +68,6 @@ export default function EpreuvesView({ data, qcmIds }) {
                 </div>
                 <div className="tagrow">
                   <span className="tag spec">{s.sectionLabel}</span>
-                  {hasQcm && <span className="tag qcm">🎯 QCM dispo</span>}
                 </div>
                 <div className="btnrow">
                   <a className="btn ghost" href={pdfUrl(enonce.file)} target="_blank" rel="noreferrer">👁 Voir</a>

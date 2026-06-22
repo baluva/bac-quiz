@@ -1,0 +1,8 @@
+{
+  "6": "Annexe n°3 — Données par produit (atelier « Coupe et couture ») :\n• Sac à dos : prix de vente HTVA 300 D ; coût variable unitaire 249 D ; temps machine 0,50 h/unité\n• Sac à main : prix de vente HTVA 220 D ; coût variable unitaire 171 D ; temps machine 0,40 h/unité",
+  "7": {
+    "ctx": "Annexe n°3 — Données par produit (atelier « Coupe et couture ») :\n• Sac à dos : prix de vente HTVA 300 D ; coût variable unitaire 249 D ; temps machine 0,50 h/unité\n• Sac à main : prix de vente HTVA 220 D ; coût variable unitaire 171 D ; temps machine 0,40 h/unité",
+    "ans": 1,
+    "exp": "La marge sur coût variable par heure machine = marge sur coût variable unitaire ÷ temps machine. Sac à dos : (300 − 249) / 0,50 = 51 / 0,50 = 102 D/h. Sac à main : (220 − 171) / 0,40 = 49 / 0,40 = 122,5 D/h. L'atelier « Coupe et couture » étant la contrainte, on fabrique en priorité le produit à plus forte marge par heure machine : le sac à main (122,5 D/h > 102 D/h)."
+  }
+}
