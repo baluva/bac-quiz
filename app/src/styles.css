@@ -119,7 +119,6 @@ select:focus, input:focus { border-color: var(--accent); }
   background: var(--card2); color: var(--muted); border: 1px solid var(--line);
 }
 .tag.spec { color: var(--accent); border-color: var(--accent); }
-.tag.qcm { color: var(--green); border-color: var(--green); }
 .tag.best { color: var(--amber); border-color: var(--amber); }
 
 .btnrow { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }

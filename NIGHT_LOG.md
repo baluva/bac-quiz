@@ -65,3 +65,10 @@ Tout respecte déjà `prefers-reduced-motion` (animations coupées si l'utilisat
 le demande). Build OK.
 **Annuler :** `git revert` du commit, ou retirer le bloc « Micro-interactions »
 en bas de `styles.css` + le `<span className="spinner">` dans `App.jsx`.
+
+### 5. Nettoyage code mort ✅ (interne, non déployé)
+**Fait :** retrait de la règle CSS `.tag.qcm` (`styles.css`), devenue inutilisée
+depuis le retrait de la pastille « 🎯 QCM dispo ». Aucun impact visuel (la classe
+n'était plus appliquée nulle part). `.tag.spec` et `.tag.best` restent utilisées.
+Build OK. **Pas de redéploiement** (nettoyage interne, rendu identique).
+**Annuler :** `git revert` du commit.
