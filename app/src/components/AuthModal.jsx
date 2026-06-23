@@ -83,7 +83,7 @@ export default function AuthModal({ onClose }) {
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-x" onClick={onClose}>×</button>
+        <button className="modal-x" onClick={onClose} aria-label="Fermer">×</button>
         <h2 style={{ margin: '0 0 4px' }}>{title}</h2>
         <p className="muted" style={{ margin: '0 0 18px', fontSize: 13 }}>
           {mode === 'reset'

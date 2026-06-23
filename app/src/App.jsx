@@ -142,19 +142,19 @@ export default function App() {
           </section>
         )}
         <div className="tabs">
-          <button className={`tab ${tab === 'qcm' ? 'active' : ''}`} onClick={() => setTab('qcm')}>
+          <button className={`tab ${tab === 'qcm' ? 'active' : ''}`} aria-current={tab === 'qcm' ? 'page' : undefined} onClick={() => setTab('qcm')}>
             🎯 Entraînement QCM{qcm ? ` · ${qcm.totalQuestions}` : ''}
           </button>
-          <button className={`tab ${tab === 'epreuves' ? 'active' : ''}`} onClick={() => setTab('epreuves')}>
+          <button className={`tab ${tab === 'epreuves' ? 'active' : ''}`} aria-current={tab === 'epreuves' ? 'page' : undefined} onClick={() => setTab('epreuves')}>
             📚 Épreuves{epreuves ? ` · ${epreuves.subjects.length}` : ''}
           </button>
-          <button className={`tab ${tab === 'tp' ? 'active' : ''}`} onClick={() => setTab('tp')}>
+          <button className={`tab ${tab === 'tp' ? 'active' : ''}`} aria-current={tab === 'tp' ? 'page' : undefined} onClick={() => setTab('tp')}>
             💻 TP{pratique ? ` · ${pratique.subjects.length}` : ''}
           </button>
-          <button className={`tab ${tab === 'classement' ? 'active' : ''}`} onClick={() => setTab('classement')}>
+          <button className={`tab ${tab === 'classement' ? 'active' : ''}`} aria-current={tab === 'classement' ? 'page' : undefined} onClick={() => setTab('classement')}>
             🏆 Classement
           </button>
-          <button className={`tab ${tab === 'profil' ? 'active' : ''}`} onClick={() => setTab('profil')}>
+          <button className={`tab ${tab === 'profil' ? 'active' : ''}`} aria-current={tab === 'profil' ? 'page' : undefined} onClick={() => setTab('profil')}>
             👤 Profil
           </button>
         </div>

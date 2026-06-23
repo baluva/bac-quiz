@@ -36,3 +36,18 @@ hero un peu plus compacts, choix de quiz un poil plus aérés. Vérifié par cap
 390px + mesure : **0 débordement horizontal** (scrollWidth = clientWidth).
 **Annuler :** `git revert` du commit, ou restaurer l'ancien bloc `@media
 (max-width: 560px)` dans `styles.css`.
+
+### 3. Accessibilité ✅
+**Problème :** quelques éléments n'étaient pas annoncés correctement aux lecteurs
+d'écran (bouton de fermeture en « × » sans nom, champ de recherche et listes de
+filtres sans libellé, onglet actif non signalé).
+
+**Fait :** ajout d'attributs ARIA (additifs, aucun changement visuel) :
+- `aria-label="Fermer"` sur le bouton × de la modale de connexion (AuthModal).
+- `aria-label` sur la recherche d'épreuves + les listes déroulantes année/session
+  (EpreuvesView) et année des QCM (QcmView).
+- `aria-current="page"` sur l'onglet actif (App.jsx) → le lecteur d'écran annonce
+  la page courante.
+Le toast a déjà `role="status"`, le ticker un `aria-label`, le logo Google
+`aria-hidden`. Build OK, zéro impact visuel.
+**Annuler :** `git revert` du commit (rien que des attributs ajoutés).

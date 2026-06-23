@@ -58,7 +58,7 @@ export default function QcmView({ data }) {
         ))}
       </div>
       <div className="filters">
-        <select value={year} onChange={(e) => setYear(e.target.value)}>
+        <select aria-label="Filtrer les QCM par année" value={year} onChange={(e) => setYear(e.target.value)}>
           <option value="all">Toutes les années</option>
           {years.map((y) => <option key={y} value={y}>Bac {y}</option>)}
         </select>

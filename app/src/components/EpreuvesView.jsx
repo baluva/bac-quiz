@@ -38,16 +38,16 @@ export default function EpreuvesView({ data }) {
         ))}
       </div>
       <div className="filters">
-        <select value={year} onChange={(e) => setYear(e.target.value)}>
+        <select aria-label="Filtrer par année" value={year} onChange={(e) => setYear(e.target.value)}>
           <option value="all">Toutes les années</option>
           {years.map((y) => <option key={y} value={y}>Bac {y}</option>)}
         </select>
-        <select value={session} onChange={(e) => setSession(e.target.value)}>
+        <select aria-label="Filtrer par session" value={session} onChange={(e) => setSession(e.target.value)}>
           <option value="all">Principale + Contrôle</option>
           <option value="principale">Principale</option>
           <option value="controle">Contrôle</option>
         </select>
-        <input type="text" placeholder="🔎 Rechercher : « math 2024 », « anglais », « 2023 »…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input type="text" aria-label="Rechercher une épreuve par matière, année ou spécialité" placeholder="🔎 Rechercher : « math 2024 », « anglais », « 2023 »…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
       <div className="count-line">{filtered.length} épreuve{filtered.length > 1 ? 's' : ''} trouvée{filtered.length > 1 ? 's' : ''}</div>
