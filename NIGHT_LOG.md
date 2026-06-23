@@ -5,6 +5,24 @@ pourquoi, et comment l'annuler. **Rien sur le paiement, build testé avant chaqu
 
 ---
 
+## ✅ BILAN DE LA NUIT (à lire au réveil)
+
+Tout est **EN LIGNE** sur https://bacquiz-tn.netlify.app — vérifié en fin de nuit
+(build OK, **959 questions**, 5 onglets, mobile propre, 0 erreur console hors le
+beacon analytics bénin). **5 améliorations**, aucune touche au paiement/secrets :
+
+1. **Questions inrépondables retirées** (969 → 959) — celles issues d'un devoir qui
+   exigeaient un document/figure non visible (« Document 1 », « d'après les documents »…).
+2. **Polish mobile** — recherche pleine largeur, 0 débordement horizontal à 390px.
+3. **Accessibilité** — libellés ARIA (fermer, recherche, filtres) + `aria-current` sur l'onglet actif.
+4. **Micro-interactions** — la bonne réponse « pop », la mauvaise « shake », retour tactile au clic, spinner de chargement.
+5. **Nettoyage** d'une règle CSS morte (`.tag.qcm`).
+
+Détail point par point ci-dessous. Pour annuler n'importe quoi : `git log --oneline`
+puis `git revert <hash>` du commit concerné.
+
+---
+
 ## Nuit du 2026-06-23
 
 ### 1. Questions inrépondables (priorité) ✅
