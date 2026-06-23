@@ -312,3 +312,21 @@ select:focus, input:focus { border-color: var(--accent); }
   text-decoration: none; font-size: 13.5px; font-weight: 600;
 }
 .doc-link:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---- Micro-interactions ---- */
+/* Retour visuel à la réponse : la bonne « rebondit », la mauvaise « tremble ».
+   (désactivé automatiquement par prefers-reduced-motion plus haut) */
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.025); } 100% { transform: scale(1); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+.choice.correct { animation: pop .3s ease-out; }
+.choice.wrong { animation: shake .35s ease-out; }
+.choice.correct .key { animation: pop .4s ease-out .05s; }
+/* Retour tactile au clic (boutons / choix / puces / onglets) */
+.btn:active, .choice:active:not(:disabled), .chip:active, .tab:active, .doc-link:active { transform: translateY(1px) scale(.99); }
+/* Spinner pour les états de chargement */
+.spinner {
+  display: inline-block; width: 16px; height: 16px; vertical-align: -3px; margin-right: 8px;
+  border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

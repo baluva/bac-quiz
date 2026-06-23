@@ -160,7 +160,7 @@ export default function App() {
         </div>
 
         {err && <div className="empty">Erreur de chargement des données : {err}</div>}
-        {!err && (!epreuves || !qcm) && tab !== 'tp' && <div className="empty">Chargement…</div>}
+        {!err && (!epreuves || !qcm) && tab !== 'tp' && <div className="empty"><span className="spinner" aria-hidden="true" />Chargement…</div>}
 
         {tab === 'classement' && <LeaderboardView />}
 

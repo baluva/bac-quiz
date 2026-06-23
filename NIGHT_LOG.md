@@ -51,3 +51,17 @@ filtres sans libellé, onglet actif non signalé).
 Le toast a déjà `role="status"`, le ticker un `aria-label`, le logo Google
 `aria-hidden`. Build OK, zéro impact visuel.
 **Annuler :** `git revert` du commit (rien que des attributs ajoutés).
+
+### 4. Micro-interactions ✅
+**But :** rendre le retour visuel plus vivant et rassurant (sans en faire trop).
+
+**Fait :** `styles.css` + une ligne dans `App.jsx` :
+- Réponse au QCM : la **bonne** réponse fait un léger « pop » (scale), la **mauvaise**
+  un petit « shake » → feedback immédiat et lisible.
+- **Retour tactile** au clic (boutons, choix, puces, onglets) : léger enfoncement.
+- **Spinner** de chargement (remplace le simple « Chargement… » par un vrai
+  indicateur animé).
+Tout respecte déjà `prefers-reduced-motion` (animations coupées si l'utilisateur
+le demande). Build OK.
+**Annuler :** `git revert` du commit, ou retirer le bloc « Micro-interactions »
+en bas de `styles.css` + le `<span className="spinner">` dans `App.jsx`.
