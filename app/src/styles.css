@@ -249,10 +249,19 @@ select:focus, input:focus { border-color: var(--accent); }
 .empty { text-align: center; color: var(--muted); padding: 50px 10px; }
 .footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 40px; }
 
-@media (max-width: 560px) {
+@media (max-width: 600px) {
+  .wrap { padding: 0 13px 56px; }
   .brand { font-size: 19px; }
   .enonce { font-size: 18px; }
   .stat { min-width: 46%; }
+  .tabs { gap: 6px; margin: 16px 0 14px; }
+  .tab { padding: 9px 14px; font-size: 14px; }
+  .hero h1 { font-size: 21px; }
+  /* Les filtres ne débordent plus : recherche pleine largeur, listes flexibles. */
+  input[type=text] { min-width: 0; }
+  .filters input[type=text] { flex: 1 1 100%; }
+  .filters select { flex: 1 1 auto; }
+  .choice { padding: 14px; font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; transition: none !important; }
